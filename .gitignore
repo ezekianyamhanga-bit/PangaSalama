@@ -3,4 +3,5 @@ __pycache__/
 .venv/
 .env
 *.sqlite3
+private_uploads/
 *.db
