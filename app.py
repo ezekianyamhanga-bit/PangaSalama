@@ -48,6 +48,9 @@ def validate_settings(settings: Mapping[str, str]) -> None:
 validate_settings(os.environ)
 SESSION_SECRET = os.getenv("SESSION_SECRET") or secrets.token_urlsafe(48)
 SECURE_COOKIES = os.getenv("SECURE_COOKIES", "false").strip().lower() == "true"
+DEFAULT_PRIMARY_NOTIFICATION_EMAIL = "ezekianyamhanga@gmail.com"
+DEFAULT_BACKUP_NOTIFICATION_EMAIL = "miriamnyamhanga237@gmail.com"
+DEFAULT_BUSINESS_WHATSAPP_NUMBER = "255788525327"
 
 
 class UploadLimitExceeded(Exception):
@@ -288,12 +291,14 @@ def check_csrf(req, supplied):
 def render(req, page="home", **data):
     headers = {"Cache-Control": "no-store"} if page in ("admin", "success", "track") else None
     return HTMLResponse(env.get_template("index.html").render(
-        page=page, csrf=csrf_token(req), whatsapp=os.getenv("BUSINESS_WHATSAPP_NUMBER", ""),
+        page=page, csrf=csrf_token(req),
+        whatsapp=os.getenv("BUSINESS_WHATSAPP_NUMBER", DEFAULT_BUSINESS_WHATSAPP_NUMBER),
         **data), headers=headers)
 
 def notify(reference, subject, message):
-    recipients = list(dict.fromkeys(filter(None, [os.getenv("PRIMARY_NOTIFICATION_EMAIL"),
-        os.getenv("BACKUP_NOTIFICATION_EMAIL")])))
+    recipients = list(dict.fromkeys(filter(None, [
+        os.getenv("PRIMARY_NOTIFICATION_EMAIL", DEFAULT_PRIMARY_NOTIFICATION_EMAIL),
+        os.getenv("BACKUP_NOTIFICATION_EMAIL", DEFAULT_BACKUP_NOTIFICATION_EMAIL)])))
     if not recipients:
         with conn() as c:
             c.execute("""INSERT INTO notifications

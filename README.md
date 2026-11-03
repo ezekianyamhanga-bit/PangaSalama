@@ -76,7 +76,9 @@ For Render, mount a persistent disk at `/var/data`, set `DATABASE_PATH=/var/data
 uvicorn app:app --host 0.0.0.0 --port $PORT
 ```
 
-Do not use an ephemeral filesystem for the database. Configure notification recipients and SMTP only if internal email is needed; no recipient addresses are enabled by default. SMTP acceptance is not proof of inbox delivery.
+Do not use an ephemeral filesystem for the database. Form notification recipients default to `ezekianyamhanga@gmail.com`, with a copy to `miriamnyamhanga237@gmail.com`; set `PRIMARY_NOTIFICATION_EMAIL` or `BACKUP_NOTIFICATION_EMAIL` in the hosting environment to override or leave a recipient empty to disable it. The WhatsApp contact link defaults to `0788525327` (configured as international number `255788525327` for `wa.me`). The link lets visitors start a WhatsApp conversation; it does not automatically forward form submissions to WhatsApp.
+
+Email delivery requires working `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`, and `EMAIL_FROM_ADDRESS` settings. Without them, the application records notifications as unconfigured for an administrator to review; it does not send email. SMTP acceptance is not proof of inbox delivery.
 
 `/health` performs a basic SQLite connectivity check. Logs are emitted as JSON lines to standard output; configure the host to capture, retain, and alert on them. This is not a substitute for provider-side uptime alerts or monitoring.
 

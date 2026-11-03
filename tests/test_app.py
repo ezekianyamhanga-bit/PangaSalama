@@ -498,6 +498,22 @@ def test_notification_retry_requires_admin_and_records_delivery(monkeypatch):
     assert (status, attempts) == ("accepted", 1)
 
 
+def test_default_request_notification_recipients_and_whatsapp_contact(monkeypatch):
+    monkeypatch.delenv("PRIMARY_NOTIFICATION_EMAIL", raising=False)
+    monkeypatch.delenv("BACKUP_NOTIFICATION_EMAIL", raising=False)
+    monkeypatch.delenv("BUSINESS_WHATSAPP_NUMBER", raising=False)
+    monkeypatch.setattr(app_module, "deliver_notification", lambda notification_id: None)
+
+    app_module.notify("PSR-TEST", "Test notification", "Synthetic message")
+    response = client.get("/")
+
+    with database_connection() as connection:
+        recipients = [row[0] for row in connection.execute(
+            "SELECT recipient FROM notifications WHERE reference_id='PSR-TEST' ORDER BY id")]
+    assert recipients == ["ezekianyamhanga@gmail.com", "miriamnyamhanga237@gmail.com"]
+    assert 'href="https://wa.me/255788525327"' in response.text
+
+
 def test_production_configuration_rejects_unsafe_values():
     valid = {
         "APP_ENV": "production",
